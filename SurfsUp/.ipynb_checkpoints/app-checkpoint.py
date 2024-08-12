@@ -1,11 +1,11 @@
 # Import the dependencies.
 import numpy as np
-
+import pandas as pd
+import datetime as dt
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
-
 from flask import Flask, jsonify
 
 
@@ -40,11 +40,11 @@ app = Flask(__name__)
 def welcome():
     return (
         f"Available Routes:<br/>"
-        f"/api/v1.0/precipitation"
-        f"/api/v1.0/stations"
-        f"/api/v1.0/tobs"
-        f"/api/v1.0/<start>"
-        f"/api/v1.0/<start>/<end>"
+        f"/api/v1.0/precipitation<br/>"
+        f"/api/v1.0/stations<br/>"
+        f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/[start]<br/>"
+        f"/api/v1.0/[start]/[end]"
     )
 
 # Precipitation route
@@ -110,7 +110,7 @@ def start(strtdate):
 
     # query & session close
     results = session.query(func.max(measurement.tobs),func.min(measurement.tobs),func.avg(measurement.tobs)).\
-        filter(measurement.date >= strtdate.\
+        filter(measurement.date >= strtdate).\
         order_by(measurement.date).all()
 
     session.close()
@@ -127,11 +127,11 @@ def start(strtdate):
 
 # start-and-end route
 @app.route("/api/v1.0/<start>/<end>")
-def start(strtdate,enddate):
+def startend(strtdate,enddate):
 
     # query & session close
     results = session.query(func.max(measurement.tobs),func.min(measurement.tobs),func.avg(measurement.tobs)).\
-        filter(measurement.date >= strtdate.\
+        filter(measurement.date >= strtdate).\
         filter(measurement.date <= enddate).\
         order_by(measurement.date).all()
 
@@ -146,3 +146,6 @@ def start(strtdate,enddate):
     stats.append(stat_dict)
 
     return jsonify(stats)
+
+if __name__ == '__main__':
+    app.run(debug=True)
